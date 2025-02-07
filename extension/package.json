@@ -1,0 +1,11 @@
+{
+  "name": "gtkn_blind_extension",
+  "version": "1.0.0",
+  "description": "Replace missing alt tags",
+  "main": "main.js",
+  "scripts": {
+    "start": "web-ext run --firefox=nightly"
+  },
+  "author": "",
+  "license": "ISC"
+}
