@@ -4,7 +4,7 @@
   "description": "Replace missing alt tags",
   "main": "main.js",
   "scripts": {
-    "start": "web-ext run --firefox=nightly"
+    "start": "npx web-ext run --firefox=nightly"
   },
   "author": "",
   "license": "ISC"
