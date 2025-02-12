@@ -34,24 +34,23 @@ let domToJson = (node) => {
     // Check for divs with background images
     if (node.tagName.toLowerCase() === 'div' && window.getComputedStyle(node).backgroundImage !== 'none') {
       const backgroundImage = window.getComputedStyle(node).backgroundImage;
-      const url = backgroundImage.slice(5, -2) || '';
-      if(url.includes('image') || url.includes('http') || url.includes('jpg') || url.includes('png')){
+      let url = backgroundImage.slice(5, -2) || '';
+      if(node.attributes['nitro-lazy-bg']) {
+        url = node.attributes['nitro-lazy-bg']['nodeValue']
+      }
+      if((url.includes('image') || url.includes('http') || url.includes('jpg') || url.includes('png')) && !attr.value.includes('gif')){
         obj['tag'] = 'img'
         obj['attributes']['src'] = url
       }
     }
   }
-  let images = 0
 
   if (node.attributes) {
     for (let attr of node.attributes) {
-      // if(images > 5) continue;
       if (attr.name === 'src' && isLocalUrl(attr.value)) {
         obj.attributes[attr.name] = window.location.origin + attr.value;
-        images++
-      }else if(attr.name.includes('src') && !attr.value.includes('svg')){
+      }else if(attr.name.includes('src') && !attr.value.includes('svg') && !attr.value.includes('gif')){
         obj.attributes['src'] = attr.value;
-        images++
       } else if(attr.name === 'src') {
         continue;
       }
