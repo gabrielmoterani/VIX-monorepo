@@ -1,7 +1,7 @@
 const API_URL = "https://11uhx8j6hf.execute-api.us-east-1.amazonaws.com/default/GTKN-Lambda"
 
 let requireRequestToAltServer = (pageJson) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         (chrome || browser).runtime.sendMessage({
             action: 'requestAltContent',
             pageJson: pageJson
@@ -9,7 +9,8 @@ let requireRequestToAltServer = (pageJson) => {
             if (response.success) {
                 resolve(response.data)
             } else {
-                throw error
+                console.log("GTKN ERROR", response.error)
+                reject(response.error)
             }
         });
     })
@@ -74,7 +75,8 @@ let createLoadingMessageDiv = () => {
 
 
 let changeDivText = (element, textContent) => {
-    element.textContent = textContent
+    if(!element) return
+    element['textContent'] = textContent
 }
 
 let fadeOutElement = (element) => {

@@ -2,6 +2,7 @@ const API_URL = "https://11uhx8j6hf.execute-api.us-east-1.amazonaws.com/default/
 
 let requestAltContentFromServer = (pageJson) => {
     console.log(JSON.stringify(pageJson))
+    let timenow = +new Date()
     return fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify(pageJson),
@@ -13,7 +14,9 @@ let requestAltContentFromServer = (pageJson) => {
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return response.text().then(errorBody => {
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date())/1000}s`);
+            });
         }
         return response.json();
     })

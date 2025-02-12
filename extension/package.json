@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "npx web-ext run --firefox=nightly",
-    "convert-ios": "xcrun safari-web-extension-converter ."
+    "convert-ios": "xcrun safari-web-extension-converter . | touch GTKN_Blind_Extension/GTKN_Blind_Extension"
   },
   "author": "",
   "license": "ISC"

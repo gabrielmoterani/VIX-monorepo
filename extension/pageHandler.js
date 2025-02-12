@@ -6,9 +6,9 @@ const handleLoad = async () => {
   
   const loadingDiv = createLoadingMessageDiv();
   changeDivText(loadingDiv, LOADING_MESSAGE);
+  const jsonResult = domToJson(document.body);
 
   try {
-    const jsonResult = domToJson(document.body);
     const altContent = await requireRequestToAltServer(jsonResult);
     const altContentElements = retrieveElementsToChangeContent(altContent);
     findByIdOrContentAndSubstituteAltContent(altContentElements);
@@ -18,7 +18,8 @@ const handleLoad = async () => {
     fadeOutElement(loadingDiv)
   } catch (error) {
     console.error('Error loading alt content:', error);
-    loadingDiv.textContent = 'Error loading alt content';
+    loadingDiv.textContent = 'Error loading alt content: ' + error || '';
+    console.log(jsonResult)
   }
 };
 

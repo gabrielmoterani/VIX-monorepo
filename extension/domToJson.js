@@ -41,13 +41,17 @@ let domToJson = (node) => {
       }
     }
   }
+  let images = 0
 
   if (node.attributes) {
     for (let attr of node.attributes) {
+      // if(images > 5) continue;
       if (attr.name === 'src' && isLocalUrl(attr.value)) {
         obj.attributes[attr.name] = window.location.origin + attr.value;
+        images++
       }else if(attr.name.includes('src') && !attr.value.includes('svg')){
         obj.attributes['src'] = attr.value;
+        images++
       } else if(attr.name === 'src') {
         continue;
       }
