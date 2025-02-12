@@ -9,7 +9,7 @@ let requireRequestToAltServer = (pageJson) => {
             if (response.success) {
                 resolve(response.data)
             } else {
-                console.error('Errorzim:', response.error);
+                throw error
             }
         });
     })
@@ -32,17 +32,39 @@ let retrieveElementsToChangeContent = (data) => {
     return data.elements || []
 }
 
+let createAltContentDisplayDiv = (altText, id) => {
+    if(document.getElementById('gtkn-added-context-' + id)) return;
+    const altContentDiv = document.createElement('div');
+    altContentDiv.className = 'alt-content-display';
+    altContentDiv.id = 'gtkn-added-context-' + id;
+    altContentDiv.style.cssText = `
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 5px;
+        font-size: 14px;
+        min-width: 300px; 
+    `;
+    altContentDiv.textContent = "Alt: " + altText;
+    return altContentDiv;
+}
+
 let findByIdOrContentAndSubstituteAltContent = (elements) => {
     elements.forEach(element => {
         let elementToChange = findElement(element);
-        console.log("el", elementToChange)
         if (elementToChange) {
-            elementToChange.alt = "Added with AI:"+ element.alt
+            elementToChange.alt = "Added with AI: " + element.alt;
+            
+            // Create and insert the alt content display div
+            const altContentDiv = createAltContentDisplayDiv(element.alt, element.id);
+            elementToChange.parentNode.insertBefore(altContentDiv, elementToChange.nextSibling);
         }
     })
 }
 
 let createLoadingMessageDiv = () => {
+    if(document.getElementById('alt-content-loading')) return
     const loadingDiv = document.createElement('div');
     loadingDiv.id = 'alt-content-loading';
     loadingDiv.textContent = 'Loading Alt Content';

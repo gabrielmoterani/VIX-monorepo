@@ -1,4 +1,3 @@
-
 function isLocalUrl(url) {
   return url.startsWith('/') || url.startsWith('./') || url.startsWith('../');
 }
@@ -8,6 +7,8 @@ let domToJson = (node) => {
       node.nodeType === Node.ELEMENT_NODE &&
       (node.tagName.toLowerCase() === 'script' ||
        node.tagName.toLowerCase() === 'style' ||
+       node.tagName.toLowerCase() === 'svg' ||
+       node.tagName.toLowerCase() === 'iframe' ||
        (node.tagName.toLowerCase() === 'link' && node.rel === 'stylesheet'))
   ) {
       return null;
@@ -20,14 +21,24 @@ let domToJson = (node) => {
   };
 
   if (node.nodeType === Node.ELEMENT_NODE) {
-    let uniqueId = node.id || ('blind-' + Math.random().toString(36).substr(2, 9));
+    let uniqueId = node.id || ('gtkn-' + Math.random().toString(36).substr(2, 9));
     
-    node.setAttribute('data-blind', uniqueId);
-    obj.attributes['data-blind'] = uniqueId;
+    node.setAttribute('data-gtkn', uniqueId);
+    obj.attributes['data-gtkn'] = uniqueId;
 
     if (!node.id) {
       node.id = uniqueId;
       obj.attributes['id'] = uniqueId;
+    }
+
+    // Check for divs with background images
+    if (node.tagName.toLowerCase() === 'div' && window.getComputedStyle(node).backgroundImage !== 'none') {
+      const backgroundImage = window.getComputedStyle(node).backgroundImage;
+      const url = backgroundImage.slice(5, -2) || '';
+      if(url.includes('image') || url.includes('http') || url.includes('jpg') || url.includes('png')){
+        obj['tag'] = 'img'
+        obj['attributes']['src'] = url
+      }
     }
   }
 
@@ -35,9 +46,16 @@ let domToJson = (node) => {
     for (let attr of node.attributes) {
       if (attr.name === 'src' && isLocalUrl(attr.value)) {
         obj.attributes[attr.name] = window.location.origin + attr.value;
-      } else {
+      }else if(attr.name.includes('src') && !attr.value.includes('svg')){
+        obj.attributes['src'] = attr.value;
+      } else if(attr.name === 'src') {
+        continue;
+      }
+      else {
         obj.attributes[attr.name] = attr.value;
+      }
     }
+    delete obj.attributes['alt'];
   }
 
   for (let child of node.childNodes) {
@@ -47,5 +65,6 @@ let domToJson = (node) => {
     }
   }
 
+
   return obj;
-}};
+};

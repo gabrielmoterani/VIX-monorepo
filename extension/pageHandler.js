@@ -10,7 +10,6 @@ const handleLoad = async () => {
   try {
     const jsonResult = domToJson(document.body);
     const altContent = await requireRequestToAltServer(jsonResult);
-    console.log(altContent)
     const altContentElements = retrieveElementsToChangeContent(altContent);
     findByIdOrContentAndSubstituteAltContent(altContentElements);
 
