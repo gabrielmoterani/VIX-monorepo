@@ -1,41 +1,6 @@
-const API_URL = "https://11uhx8j6hf.execute-api.us-east-1.amazonaws.com/default/GTKN-Lambda"
+const initialize = () => {
+    const browserEventHandler = new BrowserEventHandler(processPageUseCase);
+    browserEventHandler.setupEventListeners();
+};
 
-let requestAltContentFromServer = (pageJson) => {
-    console.log(JSON.stringify(pageJson))
-    let timenow = +new Date()
-    return fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(pageJson),
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(errorBody => {
-                throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date())/1000}s`);
-            });
-        }
-        return response.json();
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-        throw error;
-    });
-}
-
-// Use runtime.onMessage for cross-browser compatibility
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'requestAltContent') {
-        requestAltContentFromServer(message.pageJson)
-            .then(response => {
-                sendResponse({ success: true, data: response });
-            })
-            .catch(error => {
-                sendResponse({ success: false, error: error.message });
-            });
-        return true; 
-    }
-});
+initialize();
