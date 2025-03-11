@@ -1,12 +1,19 @@
-# GTKN-monorepo
+# VIX-monorepo
 
 ## Overview
-GTKN is a mobile web browser extension designed to enhance accessibility for individuals with vision disabilities by replacing missing alt tags on web pages.
+VIX (Visual Impairement Extension) is a mobile web browser extension designed to enhance accessibility for individuals with vision disabilities by replacing missing alt tags on web pages.
+
+## Purpose
+
+This project is part of a research made during Agoma University Master Degree in Computer Science. The research aims on using AI and ML to provide better experience while navigating web for people with visual impairment.
+
+## Author
+The Author of this Project is Gabriel Moterani (TL Studio CTO) and Dr. Randy Lin (Algoma U Professor).
 
 ## Features
 - Automatically replaces missing alt tags on images.
-- Works seamlessly with Firefox Nightly.
-- Provides a user-friendly interface for easy navigation.
+- Add WCAG and ARIA tags using the context from the page.
+- Sumarizes pages.
 
 ## Prerequisites
 Before you begin, ensure you have met the following requirements:
@@ -18,8 +25,8 @@ To install and run the GTKN Blind Extension, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/gabrielmoterani/GTKN-monorepo.git 
-   cd GTKN-monorepo/extension
+   git clone https://github.com/gabrielmoterani/VIX-monorepo.git extension
+   cd VIX-monorepo/extension
    ```
 
 2. **Install the dependencies:**

@@ -1,12 +1,12 @@
 {
-  "name": "gtkn_blind_extension",
+  "name": "vix",
   "version": "1.0.0",
-  "description": "Replace missing alt tags",
+  "description": "Add WCAG and ARIA tags to web pages, and summarize the page content.",
   "main": "main.js",
   "scripts": {
     "start": "npx web-ext run --firefox=nightly",
-    "convert-ios": "xcrun safari-web-extension-converter . | touch GTKN_Blind_Extension/GTKN_Blind_Extension"
+    "convert-ios": "xcrun safari-web-extension-converter . | touch VIX/VIX"
   },
-  "author": "",
+  "author": "TL Studio & Algoma University",
   "license": "ISC"
 }
