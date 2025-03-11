@@ -9,9 +9,8 @@
     "format:check": "prettier --check \"extension/src/**/*.{js,json,md}\"",
     "prepare": "husky install",
     "start": "cd extension && npx web-ext run --firefox=nightly",
-    "convert-ios": "xcrun safari-web-extension-converter . | touch VIX/VIX",
-    "start:backend": "cd backend && python app.py",
-    "install-backend": "cd backend && pip install -r requirements.txt"
+    "convert-ios": "cd extension && xcrun safari-web-extension-converter .",
+    "start:backend": "docker compose up -d"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

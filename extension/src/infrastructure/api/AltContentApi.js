@@ -1,6 +1,7 @@
 class AltContentApi {
   constructor() {
-    this.API_URL = 'http://localhost:5002/api';
+    // this.API_URL = 'http://localhost:5002/api';
+    this.API_URL = 'https://vix-monorepo.fly.dev/api';
   }
 
   async requestImageAltText(imageUrl, summary) {
@@ -53,6 +54,7 @@ class AltContentApi {
 
       return await response.json();
     } catch (error) {
+      console.log('!!!!!!!', error);
       console.error('There was a problem with the fetch operation:', error);
       throw error;
     }

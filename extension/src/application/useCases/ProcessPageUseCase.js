@@ -33,24 +33,26 @@ class ProcessPageUseCase {
       );
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading WCAG context');
       const { response: wcagCheck } = await this.altContentApi.requestWCAGCheck(pageJson);
-      const wcagCheckElements = this.extractAltContentElements(JSON.parse(wcagCheck));
+      if (!wcagCheck.startsWith('Error')) {
+        const wcagCheckElements = this.extractAltContentElements(JSON.parse(wcagCheck));
 
-      for (const element of wcagCheckElements) {
-        for (const attribute of element.addAttributes) {
-          try {
-            this.domModifier.modifyElement(element.id, attribute.attributeName, attribute.value);
-          } catch (error) {
-            console.error('Error modifying element:', error);
+        for (const element of wcagCheckElements) {
+          for (const attribute of element.addAttributes) {
+            try {
+              this.domModifier.modifyElement(element.id, attribute.attributeName, attribute.value);
+            } catch (error) {
+              console.error('Error modifying element:', error);
+            }
           }
         }
+        this.domModifier.applyQueuedModifications();
+        this.loadingIndicator.updateStatus(
+          loadingDiv,
+          `Added WCAG context to ${wcagCheckElements.length} elements`
+        );
+      } else {
+        this.loadingIndicator.updateStatus(loadingDiv, 'Error loading WCAG context');
       }
-      this.domModifier.applyQueuedModifications();
-
-      this.loadingIndicator.updateStatus(
-        loadingDiv,
-        `Added WCAG context to ${wcagCheckElements.length} elements`
-      );
-
       this.loadingIndicator.fadeOut(loadingDiv);
     } catch (error) {
       console.error('Error processing page:', error);
