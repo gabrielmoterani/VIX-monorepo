@@ -5,17 +5,17 @@ class PromptService:
     def __init__(self):
         self.openai_repo = OpenAIRepository()
 
-    def process_prompt_1(self, content: str) -> Prompt:
-        prompt = Prompt(prompt_type="type1", content=content)
-        prompt.response = self.openai_repo.process_prompt(content)
+    def parse_image(self, content: dict) -> Prompt:
+        prompt = Prompt(prompt_type="parse_image", content=content)
+        prompt.response = self.openai_repo.process_image(content)
         return prompt
 
-    def process_prompt_2(self, content: str) -> Prompt:
-        prompt = Prompt(prompt_type="type2", content=content)
-        prompt.response = self.openai_repo.process_prompt(content)
+    def wcag_check(self, content: str) -> Prompt:
+        prompt = Prompt(prompt_type="wcag_check", content=content)
+        prompt.response = self.openai_repo.process_wcag_check(content)
         return prompt
 
-    def process_prompt_3(self, content: str) -> Prompt:
-        prompt = Prompt(prompt_type="type3", content=content)
-        prompt.response = self.openai_repo.process_prompt(content)
+    def summarize_page(self, content: str) -> Prompt:
+        prompt = Prompt(prompt_type="summarize_page", content=content)
+        prompt.response = self.openai_repo.process_summary(content)
         return prompt 

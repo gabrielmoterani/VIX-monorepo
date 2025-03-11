@@ -15,8 +15,10 @@
         "matches": ["<all_urls>"],
         "js": [
           "src/domain/services/DomProcessingService.js",
+          "src/domain/services/ImageParsingService.js",
           "src/infrastructure/api/AltContentApi.js",
           "src/presentation/LoadingIndicator.js",
+          "src/presentation/SummaryIndicator.js",
           "src/application/useCases/ProcessPageUseCase.js",
           "src/presentation/DomModifier.js",
           "src/content.js"

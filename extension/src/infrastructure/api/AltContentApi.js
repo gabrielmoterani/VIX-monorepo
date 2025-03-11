@@ -1,14 +1,15 @@
 class AltContentApi {
   constructor() {
-    this.API_URL = 'https://11uhx8j6hf.execute-api.us-east-1.amazonaws.com/default/GTKN-Lambda';
+    this.API_URL = 'http://localhost:5002/api';
   }
 
-  async requestAltContent(pageJson) {
+  async requestImageAltText(imageUrl, summary) {
     const timenow = +new Date();
     try {
-      const response = await fetch(this.API_URL, {
+      // console.log('!!!!!!!', imageUrl, summary);
+      const response = await fetch(this.API_URL + '/parse_image', {
         method: 'POST',
-        body: JSON.stringify(pageJson),
+        body: JSON.stringify({ content: { imageUrl, summary } }),
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
@@ -19,7 +20,61 @@ class AltContentApi {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `HTTP error ${this.API_URL + '/parse_image'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+      throw error;
+    }
+  }
+
+  async requestSummary(texts) {
+    const timenow = +new Date();
+    try {
+      const response = await fetch(this.API_URL + '/summarize_page', {
+        method: 'POST',
+        body: JSON.stringify({ content: texts }),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(
+          `HTTP error ${this.API_URL + '/summarize_page'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+      throw error;
+    }
+  }
+
+  async requestWCAGCheck(jsonContent) {
+    const timenow = +new Date();
+    try {
+      const response = await fetch(this.API_URL + '/wcag_check', {
+        method: 'POST',
+        body: JSON.stringify({ content: JSON.stringify(jsonContent) }),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(
+          `HTTP error ${this.API_URL + '/summarize_page'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
         );
       }
 

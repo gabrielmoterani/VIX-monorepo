@@ -4,8 +4,17 @@ class DomProcessingService {
   }
 
   processDom(node) {
-    // Skip if node is null or is a text node
-    if (!node || node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE) {
+    // Skip if node is null or is a comment node
+    if (!node || node.nodeType === Node.COMMENT_NODE) {
+      return null;
+    }
+
+    // Handle text nodes
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent.trim();
+      if (text) {
+        return { type: 'text', text: text };
+      }
       return null;
     }
 
@@ -19,6 +28,7 @@ class DomProcessingService {
       tag: node.tagName ? node.tagName.toLowerCase() : null,
       attributes: this.processAttributes(node),
       children: [],
+      text: node.textContent ? node.textContent.trim() : ''
     };
 
     // Add GTKN identifier
@@ -121,6 +131,57 @@ class DomProcessingService {
         url.includes('png')) &&
       !url.includes('gif')
     );
+  }
+
+  retrieveImages(node) {
+    const images = [];
+    
+    // If node is an object with a tag property (from processDom output)
+    if (node && typeof node === 'object') {
+      // Check if this is an image element
+      if (node.tag === 'img') {
+        images.push(node);
+      }
+      
+      // Recursively process children if they exist
+      if (Array.isArray(node.children)) {
+        for (const child of node.children) {
+          const childImages = this.retrieveImages(child);
+          images.push(...childImages);
+        }
+      }
+    }
+    
+    return images;
+  }
+
+  retrieveTexts(node) {
+    const texts = [];
+    
+    // If node is null, return empty array
+    if (!node) {
+      return [];
+    }
+    
+    // Handle text nodes
+    if (node.type === 'text') {
+      return [node.text];
+    }
+    
+    // If this is an element node with text content
+    if (node.text && node.text.trim()) {
+      texts.push(node.text);
+    }
+    
+    // Recursively process children if they exist
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        const childTexts = this.retrieveTexts(child);
+        texts.push(...childTexts);
+      }
+    }
+    
+    return texts;
   }
 
   processHTML(node) {

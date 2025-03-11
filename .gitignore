@@ -3,7 +3,7 @@ extension/node_modules
 page.json
 bkup/*
 node_modules/*
-backend/.env
+.env
 backend/venv
 __pycache__/
 *.py[cod]

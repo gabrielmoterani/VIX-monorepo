@@ -6,15 +6,53 @@ class OpenAIRepository:
         # Set API key for older version of OpenAI package
         openai.api_key = Config.OPENAI_API_KEY
 
-    def process_prompt(self, prompt: str, model: str = "gpt-3.5-turbo") -> str:
+    def process_image(self, prompt: any, model: str = "gpt-4o-mini") -> str:
         try:
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=[
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": "You are a system that analyzes web images and generates alt text for them."},
+                    {"role": "system", "content": "You will be given the page summary so you can generate the alt text based on the content of the page."},
+                    {"role": "user", "content": prompt['summary']},
+                    {"role": "system", "content": "You will be given the url of the image, so you can generate the alt text based on the content of the page."},
+                    {"role": "user", "content": prompt['imageUrl']},
+                    {"role": "system", "content": "Generate a concise, descriptive alt text for this image, WCAG compliant. Focus on the main subject, important details, and context. The alt text should be helpful for visually impaired users."},
                 ]
             )
             return response.choices[0].message.content
         except Exception as e:
-            print(f"Error calling OpenAI API: {e}")
-            return f"Error processing prompt: {str(e)}" 
+            print(f"Error calling OpenAI API: {prompt}")
+            return f"Error processing prompt: {str(prompt)}"
+        
+    def process_summary(self, prompt: str, model: str = "gpt-4o-mini") -> str:
+        try:
+            # For vision models, we need to format the message differently
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "You are a system that summarizes web pages, you will be given a string with all extracted texts from the page and you will need to summarize it in a few sentences."},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error calling OpenAI Vision API: {e}")
+            return f"Error processing image: {str(e)}"
+
+    def process_wcag_check(self, prompt: str, model: str = "gpt-4o-mini") -> str:
+        try:
+            # For vision models, we need to format the message differently
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "You are a system that checks web pages for WCAG and ARIA compliance, you will be given a json represatation of the DOM elements on the page"},
+                    {"role": "user", "content": prompt},
+                    {"role": "system", "content": "You will need to check the page for WCAG and ARIA compliance. Return a json with the array of elements that are not WCAG compliant and the tags to make them compliant, ignore ALT tags."},
+                    {"role": "system", "content": "Return a JSON with the following format: {'elements': [{'id': 'string', 'addAttributes': [{'attributeName': 'string', 'value': 'string'}]}]}. The id is the id of the element, the addAttributes is an array of attributes and values to add to the element to make it compliant."},
+                    {"role": "system", "content": "Return a JSON and only the JSON, no other text or comments."}
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error calling OpenAI Vision API: {e}")
+            return f"Error processing image: {str(e)}"
