@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  vix-extension-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - FLASK_RUN_HOST=0.0.0.0
+    volumes:
+      - ./backend:/app
+      - ./.env:/app/.env
+    restart: unless-stopped
+
+
