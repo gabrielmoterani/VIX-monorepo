@@ -26,6 +26,10 @@ class DomProcessingService {
     element.attributes['data-vix'] = uniqueId;
     node.setAttribute('data-vix', uniqueId);
 
+    if (!node.attributes['id']) {
+      element.attributes['id'] = uniqueId;
+    }
+
     // Process background images for divs
     if (node.tagName?.toLowerCase() === 'div') {
       const computedStyle = window.getComputedStyle(node);

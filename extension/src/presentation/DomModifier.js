@@ -4,7 +4,10 @@ class DomModifier {
   }
 
   modifyElement(id, attributeName, attributeValue) {
-    const element = document.getElementById(id);
+    let element = document.getElementById(id);
+    if (!element) {
+      element = document.querySelector(`[data-vix="${id}"]`);
+    }
     if (!element) {
       console.warn(`Element with id ${id} not found`);
       return false;
