@@ -1,3 +1,17 @@
 extension/GTKN Blind Extension
 extension/node_modules
 page.json
+bkup/*
+node_modules/*
+backend/.env
+backend/venv
+__pycache__/
+*.py[cod]
+*$py.class
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
