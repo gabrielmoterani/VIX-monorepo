@@ -1,5 +1,6 @@
 import json
 from playwright.sync_api import sync_playwright
+import sys
 
 class AccessibilityService:
     def __init__(self):
@@ -22,7 +23,9 @@ class AccessibilityService:
                 page.set_content(html_content)
                 snapshot = page.accessibility.snapshot()
                 browser.close()
+                print("Accessibility tree snapshot:", file=sys.stderr, flush=True)
+                print(json.dumps(snapshot, indent=2), file=sys.stderr, flush=True)
                 return snapshot
         except Exception as e:
-            print(f"Error getting accessibility tree: {e}")
+            print(f"Error getting accessibility tree: {e}", file=sys.stderr, flush=True)
             return {"error": f"Error getting accessibility tree: {str(e)}"} 

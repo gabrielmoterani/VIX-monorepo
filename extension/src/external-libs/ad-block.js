@@ -135,7 +135,6 @@ class AdBlock {
 
       let position = -1;
       for (let i = 0; i < items.length; i++) {
-        console.log('ITEM', items);
         const item = items[i];
 
         const indexOf = processedUrl.indexOf(item.text, position + 1);
@@ -183,7 +182,6 @@ class AdBlock {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item) return false;
-      console.log('ITEM', item);
 
       try {
         const indexOf = url.indexOf(item.text, position + 1);

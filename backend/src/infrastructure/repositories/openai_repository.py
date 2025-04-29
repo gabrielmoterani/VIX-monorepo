@@ -62,17 +62,14 @@ class OpenAIRepository:
             
     def process_page_task(self, html_content: str, task_prompt: str, page_summary: str, model: str = "gpt-4o-mini") -> str:
         try:
-            # Get accessibility tree using the AccessibilityService
-            accessibility_tree = self.accessibility_service.get_accessibility_tree(html_content)
-            
             # Format the prompt for OpenAI
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an AI assistant that helps users interact with web pages based on their instructions."},
-                    {"role": "system", "content": "You will be given an accessibility tree of a web page, a task prompt, and a summary of the page."},
-                    {"role": "user", "content": f"Accessibility Tree: {json.dumps(accessibility_tree)}\n\nTask Prompt: {task_prompt}\n\nPage Summary: {page_summary}"},
-                    {"role": "system", "content": "Based on the task prompt, generate JavaScript commands that can be executed to accomplish the task. Return a JSON response with the following structure: {\"explanation\": \"An simple answer to the task prompt\", \"js_commands\": [\"command1\", \"command2\", ...]}. The js_commands should be JavaScript commands that can be executed to fulfill the task."},
+                    {"role": "system", "content": "You will be given an json representation of the DOM of a web page, a task prompt, and a summary of the page."},
+                    {"role": "user", "content": f"DOM: {json.dumps(html_content)}\n\nTask Prompt: {task_prompt}\n\nPage Summary: {page_summary}"},
+                    {"role": "system", "content": "Based on the task prompt, generate JavaScript commands that can be executed to accomplish the task, prefer using querySelector that used the vix-id attribute. Return a JSON response with the following structure: {\"explanation\": \"An simple answer to the task prompt, in a friendly way, describe if its possible to do the task or not, if its not possible, explain why\", \"js_commands\": [\"command1\", \"command2\", ...]}. The js_commands should be JavaScript commands that can be executed to fulfill the task, use the vix-id attribute to select the elements."},
                     {"role": "system", "content": "Return a JSON and only the JSON, no other text or comments."}
                 ],
             )

@@ -1,6 +1,6 @@
 // Auto-generated ad-block rules
 // Source: https://easylist.to/easylist/easylist.txt
-// Generated on: 2025-04-29T18:21:04.684Z
+// Generated on: 2025-04-29T18:49:23.500Z
 
 // Export the rules array
 const baseAdBlockRules = [

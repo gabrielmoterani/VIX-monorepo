@@ -43,7 +43,7 @@ class ProcessPageUseCase {
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading summary');
       const { response: summary } = await this.altContentApi.requestSummary(texts);
       this.summary = summary;
-      this.htmlContent = document.body.innerHTML;
+      this.htmlContent = pageJson;
       this.chatInterface.show();
       this.summaryIndicator.show(summary);
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading additional images context');

@@ -32,6 +32,7 @@ class ConversationProcessingService {
       // The response.response is a JSON string, so we need to parse it
       const parsedResponse = JSON.parse(response.response);
       
+      console.log('PARSED RESPONSE', parsedResponse);
       // Return only the explanation and js_commands
       return {
         explanation: parsedResponse.explanation,
