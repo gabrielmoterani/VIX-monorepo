@@ -30,4 +30,39 @@ def summarize_page():
         return jsonify({'error': 'No content provided', 'content': content}), 400
     
     result = prompt_service.summarize_page(content)
-    return jsonify({'response': result.response}) 
+    return jsonify({'response': result.response})
+
+@api_blueprint.route('/execute_page_task', methods=['POST'])
+def execute_page_task():
+    data = request.json
+    html_content = data.get('html_content')
+    task_prompt = data.get('task_prompt')
+    page_summary = data.get('page_summary')
+    
+    if not html_content:
+        return jsonify({'error': 'No HTML content provided'}), 400
+    
+    if not task_prompt:
+        return jsonify({'error': 'No task prompt provided'}), 400
+    
+    if not page_summary:
+        return jsonify({'error': 'No page summary provided'}), 400
+    
+    result = prompt_service.execute_page_task(
+        html_content=html_content,
+        task_prompt=task_prompt,
+        page_summary=page_summary
+    )
+    
+    return jsonify({'response': result.response})
+
+@api_blueprint.route('/get_accessibility_tree', methods=['POST'])
+def get_accessibility_tree():
+    data = request.json
+    html_content = data.get('html_content')
+    
+    if not html_content:
+        return jsonify({'error': 'No HTML content provided'}), 400
+    
+    accessibility_tree = prompt_service.get_accessibility_tree(html_content)
+    return jsonify({'accessibility_tree': accessibility_tree}) 

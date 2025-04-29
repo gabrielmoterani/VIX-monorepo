@@ -11,7 +11,7 @@ class ImageParsingService {
       try {
         const { response } = await this.requestImageAltText(url, summary);
         // await this.addAltContentBelowImage(id, response);
-        this.domModifier.queueModification(id, 'alt', 'VIX: ' + response);
+        this.domModifier.queueModification(id, 'alt', `VIX: ${response}`);
         this.domModifier.applyQueuedModifications();
         success++;
       } catch (error) {

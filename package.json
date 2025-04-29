@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "start": "node requireRules.js && cd extension && npx web-ext run --firefox=nightly",
     "convert-ios": "cd extension && xcrun safari-web-extension-converter .",
-    "start:backend": "docker compose up -d"
+    "start:backend": "docker compose up"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

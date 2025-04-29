@@ -20,11 +20,13 @@ class ProcessPageUseCase {
     this.wcagCheck = wcagCheck;
     this.chatInterface = chatInterface;
   }
+  
+  summary = '';
+  htmlContent = '';
 
   async execute(document) {
     // DISPLAY LOADING INDICATOR
     const loadingDiv = this.loadingIndicator.show();
-    this.chatInterface.show();
     // PROCESS DOM
     const pageJson = this.domProcessingService.processDom(document.body);
 
@@ -40,6 +42,9 @@ class ProcessPageUseCase {
       // LOAD SUMMARY
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading summary');
       const { response: summary } = await this.altContentApi.requestSummary(texts);
+      this.summary = summary;
+      this.htmlContent = document.body.innerHTML;
+      this.chatInterface.show();
       this.summaryIndicator.show(summary);
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading additional images context');
 
@@ -81,9 +86,11 @@ class ProcessPageUseCase {
       //   this.loadingIndicator.updateStatus(loadingDiv, 'Error loading WCAG context');
       // }
       this.loadingIndicator.fadeOut(loadingDiv);
+      return this; // Return this instance to allow chaining
     } catch (error) {
       console.error('Error processing page:', error);
       this.loadingIndicator.showError(loadingDiv, error);
+      throw error; // Re-throw the error to be caught by the caller
     }
   }
 

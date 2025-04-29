@@ -1,10 +1,13 @@
 import openai
 from config import Config
+import json
+from src.application.services.accessibility_service import AccessibilityService
 
 class OpenAIRepository:
     def __init__(self):
         # Set API key for older version of OpenAI package
         openai.api_key = Config.OPENAI_API_KEY
+        self.accessibility_service = AccessibilityService()
 
     def process_image(self, prompt: any, model: str = "gpt-4o-mini") -> str:
         try:
@@ -56,3 +59,24 @@ class OpenAIRepository:
         except Exception as e:
             print(f"Error calling OpenAI Vision API: {e}")
             return f"Error processing image: {str(e)}"
+            
+    def process_page_task(self, html_content: str, task_prompt: str, page_summary: str, model: str = "gpt-4o-mini") -> str:
+        try:
+            # Get accessibility tree using the AccessibilityService
+            accessibility_tree = self.accessibility_service.get_accessibility_tree(html_content)
+            
+            # Format the prompt for OpenAI
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "You are an AI assistant that helps users interact with web pages based on their instructions."},
+                    {"role": "system", "content": "You will be given an accessibility tree of a web page, a task prompt, and a summary of the page."},
+                    {"role": "user", "content": f"Accessibility Tree: {json.dumps(accessibility_tree)}\n\nTask Prompt: {task_prompt}\n\nPage Summary: {page_summary}"},
+                    {"role": "system", "content": "Based on the task prompt, generate JavaScript commands that can be executed to accomplish the task. Return a JSON response with the following structure: {\"explanation\": \"An simple answer to the task prompt\", \"js_commands\": [\"command1\", \"command2\", ...]}. The js_commands should be JavaScript commands that can be executed to fulfill the task."},
+                    {"role": "system", "content": "Return a JSON and only the JSON, no other text or comments."}
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error processing page task: {e}")
+            return f"Error processing page task: {str(e)}"

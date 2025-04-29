@@ -1,7 +1,6 @@
-class AltContentApi {
-  constructor() {
-    // this.API_URL = 'http://localhost:5002/api';
-    this.API_URL = 'https://vix-monorepo.fly.dev/api';
+class ContentAPI {
+  constructor(API_URL) {
+    this.API_URL = API_URL;
   }
 
   async requestImageAltText(imageUrl, summary) {
@@ -86,4 +85,5 @@ class AltContentApi {
       throw error;
     }
   }
+
 }

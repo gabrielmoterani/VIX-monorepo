@@ -1,16 +1,20 @@
 // Main entry point
 const initialize = () => {
   // API
-  const altContentApi = new AltContentApi();
-
-  // SERVICES
-  const conversationProcessingService = new ConversationProcessingService();
+  const mainAPI = new MainAPI();
+  const contentApi = new ContentAPI(mainAPI.API_URL);
 
   // PRESENTATION HANDLERS
   const loadingIndicator = new LoadingIndicator();
   const summaryIndicator = new SummaryIndicator();
-  const chatInterface = new ChatInterface(conversationProcessingService);
   const domModifier = new DomModifier();
+
+  // SERVICES
+  const domProcessingService = new DomProcessingService();
+  const imageParsingService = new ImageParsingService(contentApi, domModifier);
+  const taskApi = new TaskAPI(mainAPI.API_URL);
+  const conversationProcessingService = new ConversationProcessingService(taskApi);
+  const chatInterface = new ChatInterface(conversationProcessingService);
 
   // EXTERNAL LIBS
   const wcagCheck = axe;
@@ -19,14 +23,10 @@ const initialize = () => {
     adBlock.parse(rule);
   }
 
-  // SERVICES
-  const domProcessingService = new DomProcessingService();
-  const imageParsingService = new ImageParsingService(altContentApi, domModifier);
-
   // ORCHESTRATION
   const processPageUseCase = new ProcessPageUseCase(
     domProcessingService,
-    altContentApi,
+    contentApi,
     loadingIndicator,
     domModifier,
     imageParsingService,
@@ -36,7 +36,13 @@ const initialize = () => {
     wcagCheck
   );
 
-  processPageUseCase.execute(document);
+  processPageUseCase.execute(document).then(() => {
+    // Update conversationProcessingService with summary and HTML content
+    conversationProcessingService.updatePageData(
+      processPageUseCase.summary,
+      processPageUseCase.htmlContent
+    );
+  });
 };
 
 initialize();
