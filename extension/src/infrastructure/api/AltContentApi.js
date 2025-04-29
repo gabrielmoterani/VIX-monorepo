@@ -8,7 +8,7 @@ class AltContentApi {
     const timenow = +new Date();
     try {
       // console.log('!!!!!!!', imageUrl, summary);
-      const response = await fetch(this.API_URL + '/parse_image', {
+      const response = await fetch(`${this.API_URL}/parse_image`, {
         method: 'POST',
         body: JSON.stringify({ content: { imageUrl, summary } }),
         headers: {
@@ -21,7 +21,7 @@ class AltContentApi {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${this.API_URL + '/parse_image'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `HTTP error ${`${this.API_URL}/parse_image`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
         );
       }
 
@@ -35,7 +35,7 @@ class AltContentApi {
   async requestSummary(texts) {
     const timenow = +new Date();
     try {
-      const response = await fetch(this.API_URL + '/summarize_page', {
+      const response = await fetch(`${this.API_URL}/summarize_page`, {
         method: 'POST',
         body: JSON.stringify({ content: texts }),
         headers: {
@@ -48,7 +48,7 @@ class AltContentApi {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${this.API_URL + '/summarize_page'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `HTTP error ${`${this.API_URL}/summarize_page`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
         );
       }
 
@@ -63,7 +63,7 @@ class AltContentApi {
   async requestWCAGCheck(jsonContent) {
     const timenow = +new Date();
     try {
-      const response = await fetch(this.API_URL + '/wcag_check', {
+      const response = await fetch(`${this.API_URL}/wcag_check`, {
         method: 'POST',
         body: JSON.stringify({ content: JSON.stringify(jsonContent) }),
         headers: {
@@ -76,7 +76,7 @@ class AltContentApi {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${this.API_URL + '/summarize_page'}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `HTTP error ${`${this.API_URL}/summarize_page`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
         );
       }
 

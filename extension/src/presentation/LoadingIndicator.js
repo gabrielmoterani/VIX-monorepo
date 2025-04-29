@@ -1,6 +1,6 @@
 class LoadingIndicator {
   constructor() {
-    this.LOADING_MESSAGE = 'Loading alternative content';
+    this.LOADING_MESSAGE = 'Loading VIX';
     this.LOADED_MESSAGE = 'Added alternative content';
     this.LABELED_MESSAGE = 'VIX MESSAGE: ';
   }
@@ -49,7 +49,7 @@ class LoadingIndicator {
     if (!element) {
       return;
     }
-    element.textContent = 'Error loading alt content: ' + (error?.message || '');
+    element.textContent = `Error loading alt content: ${error?.message || ''}`;
     element.style.backgroundColor = '#f44336'; // Red background for errors
   }
 

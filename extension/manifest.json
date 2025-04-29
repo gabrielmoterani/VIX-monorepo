@@ -13,12 +13,17 @@
       {
         "matches": ["<all_urls>"],
         "js": [
-          "src/domain/services/DomProcessingService.js",
-          "src/domain/services/ImageParsingService.js",
+          "src/external-libs/ad-block.js",
+          "src/external-libs/ad-block-rules.js",
+          "src/external-libs/axe.min.js",
+          "src/services/DomProcessingService.js",
+          "src/services/ImageParsingService.js",
+          "src/services/ConversationProcessingService.js",
+          "src/services/ProcessPageUseCase.js",
           "src/infrastructure/api/AltContentApi.js",
+          "src/presentation/ChatInterface.js",
           "src/presentation/LoadingIndicator.js",
           "src/presentation/SummaryIndicator.js",
-          "src/application/useCases/ProcessPageUseCase.js",
           "src/presentation/DomModifier.js",
           "src/content.js"
         ]

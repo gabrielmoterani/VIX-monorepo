@@ -28,16 +28,16 @@ class DomProcessingService {
       tag: node.tagName ? node.tagName.toLowerCase() : null,
       attributes: this.processAttributes(node),
       children: [],
-      text: node.textContent ? node.textContent.trim() : ''
+      text: node.textContent ? node.textContent.trim() : '',
     };
 
     // Add GTKN identifier
-    const uniqueId = 'vix-' + Math.random().toString(36).substr(2, 9);
+    const uniqueId = `vix-${Math.random().toString(36).substr(2, 9)}`;
     element.attributes['data-vix'] = uniqueId;
     node.setAttribute('data-vix', uniqueId);
 
-    if (!node.attributes['id']) {
-      element.attributes['id'] = uniqueId;
+    if (!node.attributes.id) {
+      element.attributes.id = uniqueId;
     }
 
     // Process background images for divs
@@ -50,7 +50,7 @@ class DomProcessingService {
 
     // Process children
     if (node.childNodes) {
-      for (let child of node.childNodes) {
+      for (const child of node.childNodes) {
         const processedChild = this.processDom(child);
         if (processedChild) {
           element.children.push(processedChild);
@@ -74,7 +74,7 @@ class DomProcessingService {
       return attributes;
     }
 
-    for (let attr of node.attributes) {
+    for (const attr of node.attributes) {
       // Skip alt attributes as they will be processed separately
       if (attr.name === 'alt') {
         continue;
@@ -88,7 +88,7 @@ class DomProcessingService {
         !attr.value.includes('svg') &&
         !attr.value.includes('gif')
       ) {
-        attributes['src'] = this.processUrl(attr.value);
+        attributes.src = this.processUrl(attr.value);
       } else {
         attributes[attr.name] = attr.value;
       }
@@ -119,7 +119,7 @@ class DomProcessingService {
 
     if (this.isValidImageUrl(url)) {
       element.tag = 'img';
-      element.attributes['src'] = this.processUrl(url);
+      element.attributes.src = this.processUrl(url);
     }
   }
 
@@ -135,14 +135,14 @@ class DomProcessingService {
 
   retrieveImages(node) {
     const images = [];
-    
+
     // If node is an object with a tag property (from processDom output)
     if (node && typeof node === 'object') {
       // Check if this is an image element
       if (node.tag === 'img') {
         images.push(node);
       }
-      
+
       // Recursively process children if they exist
       if (Array.isArray(node.children)) {
         for (const child of node.children) {
@@ -151,28 +151,29 @@ class DomProcessingService {
         }
       }
     }
-    
+
     return images;
   }
 
   retrieveTexts(node) {
     const texts = [];
-    
+
     // If node is null, return empty array
     if (!node) {
       return [];
     }
-    
+
     // Handle text nodes
     if (node.type === 'text') {
       return [node.text];
     }
-    
+
     // If this is an element node with text content
+    // biome-ignore lint/complexity/useOptionalChain: No need to use optional chain here
     if (node.text && node.text.trim()) {
       texts.push(node.text);
     }
-    
+
     // Recursively process children if they exist
     if (Array.isArray(node.children)) {
       for (const child of node.children) {
@@ -180,7 +181,7 @@ class DomProcessingService {
         texts.push(...childTexts);
       }
     }
-    
+
     return texts;
   }
 

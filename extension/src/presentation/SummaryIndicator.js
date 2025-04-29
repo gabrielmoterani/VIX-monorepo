@@ -29,7 +29,15 @@ class SummaryIndicator {
       loadingDiv.remove();
     });
 
-    document.body.insertBefore(loadingDiv, document.body.firstChild);
+    // Check if ChatInterface exists and append to it if it does
+    const chatInterface = document.getElementById('vix-chat-interface');
+    if (chatInterface) {
+      chatInterface.appendChild(loadingDiv);
+    } else {
+      // If ChatInterface doesn't exist, append to document body as before
+      document.body.insertBefore(loadingDiv, document.body.firstChild);
+    }
+
     return loadingDiv;
   }
 }
