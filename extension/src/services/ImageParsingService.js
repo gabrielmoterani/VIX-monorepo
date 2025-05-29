@@ -7,9 +7,13 @@ class ImageParsingService {
   async execute(imageNodes, summary, model) {
     let success = 0;
     const imageUrls = this.extractImageUrls(imageNodes);
+    let imagesTime = 0
     for (const { url, id } of imageUrls) {
       try {
+        const now = new Date();
         const { response } = await this.requestImageAltText(url, summary, model);
+        const time = new Date() - now;
+        imagesTime += time;
         // await this.addAltContentBelowImage(id, response);
         this.domModifier.queueModification(id, 'alt', `VIX: ${response}`);
         this.domModifier.applyQueuedModifications();
@@ -18,7 +22,7 @@ class ImageParsingService {
         console.log('Error processing image:', error);
       }
     }
-    return success;
+    return { success, imagesTime };
   }
 
   extractImageUrls(imageNodes) {

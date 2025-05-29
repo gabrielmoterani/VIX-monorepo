@@ -1,19 +1,17 @@
 class TaskAPI {
-    constructor(API_URL, summary, htmlContent, actions) {
+    constructor(API_URL) {
         this.API_URL = API_URL;
-        this.summary = summary;
-        this.htmlContent = htmlContent;
-        this.actions = actions;
     }
-    async requestPageTask(taskPrompt) {
+    async requestPageTask(taskPrompt, actions, summary) {
+      console.log("VIX: REQUESTING PAGE TASK", actions, summary);
       const timenow = +new Date();
       try {
         const response = await fetch(`${this.API_URL}/execute_page_task`, {
           method: 'POST',
           body: JSON.stringify({ 
-              html_content: JSON.stringify(this.actions), 
+              html_content: JSON.stringify(actions), 
               task_prompt: taskPrompt, 
-              page_summary: this.summary,
+              page_summary: summary,
           }),  
           headers: {
             'Content-Type': 'application/json',
@@ -35,5 +33,7 @@ class TaskAPI {
         throw error;
       }
     }
+
+
   }
   

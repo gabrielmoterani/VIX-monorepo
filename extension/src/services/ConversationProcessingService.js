@@ -1,31 +1,42 @@
 class ConversationProcessingService {
-  constructor(contentApi) {
+  constructor(taskApi) {
     this.conversation = [];
-    this.contentApi = contentApi;
+    this.taskApi = taskApi;
     this.summary = '';
     this.htmlContent = '';
+    this.actions = [];
   }
 
   async addMessage(message, callback) {
     this.conversation.push(message);
     if (message.direction === 'out') {
-      const response = await this.executePrompt(message.content);
-      if(response.js_commands) {
-        await this.executeJsCommands(response.js_commands);
-      }
-      if(response.explanation) {
-        const assistantMessage = {
+      try {
+        const response = await this.executePrompt(message.content);
+        if(response.js_commands) {
+          await this.executeJsCommands(response.js_commands);
+        }
+        if(response.explanation) {
+          const assistantMessage = {
+            direction: 'in',
+            content: response.explanation
+          };
+          this.conversation.push(assistantMessage);
+          callback(this.conversation);
+        }
+        return;
+      } catch (error) {
+        this.conversation.push({
           direction: 'in',
-          content: response.explanation
-        };
-        this.conversation.push(assistantMessage);
+          content: 'Error getting response, try again later'
+        });
         callback(this.conversation);
+        return;
       }
     }
   }
 
   async executePrompt(taskPrompt) {
-    const response = await this.contentApi.requestPageTask(taskPrompt);
+    const response = await this.taskApi.requestPageTask(taskPrompt, this.actions, this.summary);
     
     // Parse the response to extract only explanation and js_commands
     try {
@@ -65,11 +76,9 @@ class ConversationProcessingService {
     this.conversation = [];
   }
   
-  updatePageData(summary, htmlContent) {
+  updatePageData(summary, htmlContent, actions) {
     this.summary = summary;
     this.htmlContent = htmlContent;
-    this.contentApi.summary = summary;
-    this.contentApi.htmlContent = htmlContent;
-    this.contentApi.actions = actions;
+    this.actions = actions;
   }
 }

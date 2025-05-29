@@ -273,7 +273,7 @@ class DomProcessingService {
 
     // Check for common interactive classes/attributes
     const interactiveClasses = ['btn', 'button', 'clickable', 'interactive'];
-    const classList = node.className?.toLowerCase() || '';
+    const classList = node.className?.toString().toLowerCase() || '';
     if (interactiveClasses.some(cls => classList.includes(cls))) return true;
 
     return false;

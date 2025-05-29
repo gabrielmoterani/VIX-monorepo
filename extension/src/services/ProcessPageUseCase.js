@@ -97,11 +97,48 @@ class ProcessPageUseCase {
     })
 
     try {
+      const now = new Date();
       //LOAD SUMMARY
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading summary');
-      console.time("VIX: TIME FOR MODEL SUMMARY")
-      const { response: summary } = await this.altContentApi.requestSummary(cleanedTexts, "o4-mini");
-      console.timeEnd("VIX: TIME FOR MODEL SUMMARY")
+      let auxTexts = texts;
+      const tokenLimit = 25000;
+      
+      // More accurate token estimation (roughly 4 characters per token)
+      const estimateTokens = (text) => Math.ceil(text.length / 4);
+      
+      // Smart text truncation that preserves important content
+      const truncateText = (text, maxTokens) => {
+        const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+        let truncatedText = '';
+        let currentTokens = 0;
+        
+        for (const sentence of sentences) {
+          const sentenceTokens = estimateTokens(sentence);
+          if (currentTokens + sentenceTokens > maxTokens) {
+            break;
+          }
+          truncatedText += sentence + '. ';
+          currentTokens += sentenceTokens;
+        }
+        
+        return truncatedText.trim();
+      };
+
+      const originalTokens = estimateTokens(texts);
+      const cleanedTokens = estimateTokens(cleanedTexts);
+
+      if (originalTokens > tokenLimit) {
+        auxTexts = cleanedTexts;
+        if (cleanedTokens > tokenLimit) {
+          // Use smart truncation instead of arbitrary word limit
+          auxTexts = truncateText(cleanedTexts, tokenLimit);
+          console.log("VIX: Text truncated to", estimateTokens(auxTexts), "tokens");
+        }
+      }
+      
+
+      const { response: summary } = await this.altContentApi.requestSummary(auxTexts, "o4-mini");
+      const summaryTime = new Date() - now;
 
       this.summary = summary;
       this.htmlContent = pageJson;
@@ -111,13 +148,27 @@ class ProcessPageUseCase {
       this.summaryIndicator.show(summary);
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading additional images context');
 
+      const startImagesTime = new Date();
       // QUERY ADDITIONAL IMAGES
-      const imagesSuccess = await this.imageParsingService.execute(filteredImages, summary, "o4-mini");
-      this.loadingIndicator.updateStatus(
-        loadingDiv,
-        `Added additional alternative images to ${imagesSuccess} images`
-      );
-      this.loadingIndicator.updateStatus(loadingDiv, 'Loading WCAG context');
+     this.imageParsingService.execute(filteredImages, summary, "o4-mini").then(({success: imagesSuccess, imagesTime: imagesTime}) => {
+        this.loadingIndicator.updateStatus(
+          loadingDiv,
+          `Added additional alternative text to ${imagesSuccess} images`
+        );
+        const allImagesTime = new Date() - startImagesTime;
+        console.log("VIX: TIMES FOR PROCESSING PAGE", {
+          summaryTime: `${summaryTime / 1000}s`,
+          allImagesTime: `${allImagesTime / 1000}s`,
+          imagesSuccess,
+          imagesTime: `${imagesTime / 1000}s`,
+          imagesTimePerImage: `${(imagesTime / imagesSuccess) / 1000}s`,
+          imagesAvarageTime: `${(imagesTime / imagesSuccess) / 1000}s`,
+        })
+        this.loadingIndicator.fadeOut(loadingDiv);
+    });
+
+
+      // this.loadingIndicator.updateStatus(loadingDiv, 'Loading WCAG context');
 
       // // QUERY WCAG CONTEXT
       // const wcagTest = await this.wcagCheck.run();
@@ -148,7 +199,7 @@ class ProcessPageUseCase {
       // } else {
       //   this.loadingIndicator.updateStatus(loadingDiv, 'Error loading WCAG context');
       // }
-      this.loadingIndicator.fadeOut(loadingDiv);
+      // this.loadingIndicator.fadeOut(loadingDiv);
       return this; // Return this instance to allow chaining
     } catch (error) {
       console.error('Error processing page:', error);

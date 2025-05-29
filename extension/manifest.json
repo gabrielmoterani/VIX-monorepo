@@ -35,7 +35,8 @@
     "permissions": [
       "webRequest",
       "https://vix-monorepo.fly.dev/api/*",
-      "http://localhost:5002/api/*"
+      "http://localhost:5002/api/*",
+      "https://*.ngrok.app/api/*"
     ],
     "background": {
       "scripts": ["src/background.js"]
