@@ -32,14 +32,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
-COPY environment.yml .
-
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install Playwright browsers
-RUN playwright install chromium
-RUN playwright install-deps
 
 # Copy the rest of the application
 COPY . .

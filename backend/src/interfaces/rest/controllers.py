@@ -55,14 +55,3 @@ def execute_page_task():
     )
     
     return jsonify({'response': result.response})
-
-@api_blueprint.route('/get_accessibility_tree', methods=['POST'])
-def get_accessibility_tree():
-    data = request.json
-    html_content = data.get('html_content')
-    
-    if not html_content:
-        return jsonify({'error': 'No HTML content provided'}), 400
-    
-    accessibility_tree = prompt_service.get_accessibility_tree(html_content)
-    return jsonify({'accessibility_tree': accessibility_tree}) 

@@ -1,8 +1,9 @@
 class TaskAPI {
-    constructor(API_URL, summary, htmlContent) {
+    constructor(API_URL, summary, htmlContent, actions) {
         this.API_URL = API_URL;
         this.summary = summary;
         this.htmlContent = htmlContent;
+        this.actions = actions;
     }
     async requestPageTask(taskPrompt) {
       const timenow = +new Date();
@@ -10,9 +11,9 @@ class TaskAPI {
         const response = await fetch(`${this.API_URL}/execute_page_task`, {
           method: 'POST',
           body: JSON.stringify({ 
-              html_content: this.htmlContent, 
+              html_content: JSON.stringify(this.actions), 
               task_prompt: taskPrompt, 
-              page_summary: this.summary 
+              page_summary: this.summary,
           }),  
           headers: {
             'Content-Type': 'application/json',

@@ -40,7 +40,8 @@ const initialize = () => {
     // Update conversationProcessingService with summary and HTML content
     conversationProcessingService.updatePageData(
       processPageUseCase.summary,
-      processPageUseCase.htmlContent
+      processPageUseCase.htmlContent,
+      processPageUseCase.actions
     );
   });
 };

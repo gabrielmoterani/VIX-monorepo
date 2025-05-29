@@ -11,3 +11,4 @@ dependencies:
     - openai==0.28.1
     - python-dotenv==0.19.0
     - flask-cors==3.0.10 
+    - playwright==1.44.1

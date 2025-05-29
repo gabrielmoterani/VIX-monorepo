@@ -1,13 +1,10 @@
 import openai
 from config import Config
 import json
-from src.application.services.accessibility_service import AccessibilityService
-
 class OpenAIRepository:
     def __init__(self):
         # Set API key for older version of OpenAI package
         openai.api_key = Config.OPENAI_API_KEY
-        self.accessibility_service = AccessibilityService()
 
     def process_image(self, prompt: any, model: str = "gpt-4o-mini") -> str:
         try:
@@ -27,7 +24,7 @@ class OpenAIRepository:
             print(f"Error calling OpenAI API: {prompt}")
             return f"Error processing prompt: {str(prompt)}"
         
-    def process_summary(self, prompt: str, model: str = "gpt-4o-mini") -> str:
+    def process_summary(self, prompt: str, model: str = "gpt-4o") -> str:
         try:
             # For vision models, we need to format the message differently
             response = openai.ChatCompletion.create(
@@ -42,7 +39,7 @@ class OpenAIRepository:
             print(f"Error calling OpenAI Vision API: {e}")
             return f"Error processing image: {str(e)}"
 
-    def process_wcag_check(self, prompt: str, model: str = "gpt-4o-mini") -> str:
+    def process_wcag_check(self, prompt: str, model: str = "gpt-4o") -> str:
         try:
             # For vision models, we need to format the message differently
             response = openai.ChatCompletion.create(
@@ -67,7 +64,7 @@ class OpenAIRepository:
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an AI assistant that helps users interact with web pages based on their instructions."},
-                    {"role": "system", "content": "You will be given an json representation of the DOM of a web page, a task prompt, and a summary of the page."},
+                    {"role": "system", "content": "You will be given an json representation of the actions to be performed on the DOM of a web page, a task prompt, and a summary of the page."},
                     {"role": "user", "content": f"DOM: {json.dumps(html_content)}\n\nTask Prompt: {task_prompt}\n\nPage Summary: {page_summary}"},
                     {"role": "system", "content": "Based on the task prompt, generate JavaScript commands that can be executed to accomplish the task, prefer using querySelector that used the data-vix attribute like this: .querySelector('[data-vix=\"DATA_VIX_ID_HERE\"]'). Return a JSON response with the following structure: {\"explanation\": \"An simple answer to the task prompt, in a friendly way, describe if its possible to do the task or not, if its not possible, explain why\", \"js_commands\": [\"command1\", \"command2\", ...]}. The js_commands should be JavaScript commands that can be executed to fulfill the task, use the data-vix attribute to select the elements."},
                     {"role": "system", "content": "Return a JSON and only the JSON, no other text or comments."}

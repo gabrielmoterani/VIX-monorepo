@@ -13,6 +13,7 @@
       {
         "matches": ["<all_urls>"],
         "js": [
+          "src/external-libs/readability.js",
           "src/external-libs/ad-block.js",
           "src/external-libs/ad-block-rules.js",
           "src/external-libs/axe.min.js",

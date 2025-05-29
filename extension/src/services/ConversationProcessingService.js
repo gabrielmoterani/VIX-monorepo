@@ -70,5 +70,6 @@ class ConversationProcessingService {
     this.htmlContent = htmlContent;
     this.contentApi.summary = summary;
     this.contentApi.htmlContent = htmlContent;
+    this.contentApi.actions = actions;
   }
 }

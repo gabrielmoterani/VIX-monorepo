@@ -9,11 +9,13 @@ class DomProcessingService {
       return null;
     }
 
+    const isActionElement = this._isActionElement(node);
+
     // Handle text nodes
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent.trim();
       if (text) {
-        return { type: 'text', text: text };
+        return { type: 'text', text: text, isActionElement: isActionElement };
       }
       return null;
     }
@@ -29,6 +31,7 @@ class DomProcessingService {
       attributes: this.processAttributes(node),
       children: [],
       text: node.textContent ? node.textContent.trim() : '',
+      isActionElement: isActionElement
     };
 
     // Add GTKN identifier
@@ -155,6 +158,47 @@ class DomProcessingService {
     return images;
   }
 
+  retrieveActionElements(node) {
+    const actionElements = [];
+
+    const _retrieveActionElements = (node) => {
+      const aux = {
+        tag: node.tag,
+        text: node.text,
+        id: node.attributes["data-vix"],
+        href: node.attributes.href || undefined,
+        type: node.attributes.type || undefined,
+        value: node.attributes.value || undefined,
+        placeholder: node.attributes.placeholder || undefined,
+        ariaLabel: node.attributes["aria-label"] || undefined,
+        ariaLabelledby: node.attributes["aria-labelledby"] || undefined,
+      }
+
+      return Object.keys(aux).reduce((acc, key) => {
+        if (aux[key]) {
+          acc[key] = aux[key];
+        }
+        return acc;
+      }, {});
+    }
+
+    if (!node) {
+      return actionElements;
+    }
+
+    if (node.isActionElement) {
+      actionElements.push(_retrieveActionElements(node));
+    }// Recursively process children if they exist
+    else if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        const childActionElements = this.retrieveActionElements(child);
+        actionElements.push(...childActionElements);
+      }
+    }
+
+    return actionElements;
+  }
+
   retrieveTexts(node) {
     const texts = [];
 
@@ -187,5 +231,67 @@ class DomProcessingService {
 
   processHTML(node) {
     return node.outerHTML || node.innerHTML || '';
+  }
+
+  _isActionElement(node) {
+    const actionTags = [
+      'button',
+      'a',
+      'input',
+      'select',
+      'textarea',
+      'label',
+      'form',
+      'option',
+      'radio',
+      'checkbox',
+      'submit',
+      'reset'
+    ];
+
+    
+    const tag = node.tagName?.toLowerCase();
+    if (!tag) return false;
+
+    // Check if it's a basic action element
+    if (actionTags.includes(tag)) return true;
+
+    // Check for input types
+    if (tag === 'input') {
+      const type = node.getAttribute('type')?.toLowerCase();
+      return type && actionTags.includes(type);
+    }
+
+    // Check for role attributes
+    const role = node.getAttribute('role')?.toLowerCase();
+    if (role && ['button', 'link', 'checkbox', 'radio', 'textbox', 'combobox'].includes(role)) {
+      return true;
+    }
+
+    // Check for click handlers
+    if (node.onclick || node.getAttribute('onclick')) return true;
+
+    // Check for common interactive classes/attributes
+    const interactiveClasses = ['btn', 'button', 'clickable', 'interactive'];
+    const classList = node.className?.toLowerCase() || '';
+    if (interactiveClasses.some(cls => classList.includes(cls))) return true;
+
+    return false;
+  }
+
+  countElements(node) {
+    let count = 0;
+
+    const _counter = (node) => {
+      count++;
+      if (Array.isArray(node.children)) {
+        for (const child of node.children) {
+          _counter(child);
+        }
+      }
+    }
+
+    _counter(node);
+    return count;
   }
 }

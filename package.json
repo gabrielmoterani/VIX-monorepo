@@ -8,7 +8,7 @@
     "format": "prettier --write \"extension/src/**/*.{js,json,md}\"",
     "format:check": "prettier --check \"extension/src/**/*.{js,json,md}\"",
     "prepare": "husky install",
-    "start": "node requireRules.js && cd extension && npx web-ext run --firefox=nightly",
+    "start": "node requireRules.js && cd extension && npx web-ext run",
     "convert-ios": "cd extension && xcrun safari-web-extension-converter .",
     "start:backend": "docker compose up"
   },

@@ -4,12 +4,12 @@ class ImageParsingService {
     this.domModifier = domModifier;
   }
 
-  async execute(imageNodes, summary) {
+  async execute(imageNodes, summary, model) {
     let success = 0;
     const imageUrls = this.extractImageUrls(imageNodes);
     for (const { url, id } of imageUrls) {
       try {
-        const { response } = await this.requestImageAltText(url, summary);
+        const { response } = await this.requestImageAltText(url, summary, model);
         // await this.addAltContentBelowImage(id, response);
         this.domModifier.queueModification(id, 'alt', `VIX: ${response}`);
         this.domModifier.applyQueuedModifications();

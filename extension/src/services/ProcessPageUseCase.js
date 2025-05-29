@@ -8,7 +8,8 @@ class ProcessPageUseCase {
     summaryIndicator,
     chatInterface,
     adBlock,
-    wcagCheck
+    wcagCheck,
+    readability
   ) {
     this.domProcessingService = domProcessingService;
     this.altContentApi = altContentApi;
@@ -19,42 +20,104 @@ class ProcessPageUseCase {
     this.adBlock = adBlock;
     this.wcagCheck = wcagCheck;
     this.chatInterface = chatInterface;
+    this.readability = readability;
   }
   
   summary = '';
   htmlContent = '';
+  actions = [];
 
   async execute(document) {
     // DISPLAY LOADING INDICATOR
     const loadingDiv = this.loadingIndicator.show();
-    // PROCESS DOM
+    const auxiliaryDocument = document.cloneNode(true);
+    const parsedDocument = new DOMParser().parseFromString(new Readability(auxiliaryDocument).parse().content, 'text/html');
+   
+    const cleanedDocumentJson = this.domProcessingService.processDom(parsedDocument.body);
     const pageJson = this.domProcessingService.processDom(document.body);
+
 
     // RETRIEVE TEXT AND IMAGES IN JSON FORMAT
     const texts = this.domProcessingService.retrieveTexts(pageJson).join(' ');
-    const images = this.domProcessingService.retrieveImages(pageJson).filter((image) => {
-      // FILTER OUT AD BLOCKED ELEMENTS
+    const cleanedTexts = this.domProcessingService.retrieveTexts(cleanedDocumentJson).join(' ');
+    const tokenOriginalEstimation = texts.length/4;
+    const tokenParsedEstimation = cleanedTexts.length/4;
+
+
+    const images = this.domProcessingService.retrieveImages(pageJson);
+    const imagesAltCounter = images.reduce((acc, image) => {
+      const imageElement = document.querySelector(`[data-vix="${image.attributes["data-vix"]}"]`);
+      const alt = imageElement ? imageElement.attributes.alt : null;
+      if (alt) {
+        acc["altCounter"] = (acc["altCounter"] || 0) + 1;
+      }
+
+      if ( alt && alt.length > 240) {
+        acc["altMeaningfulCounter"] = (acc["altMeaningfulCounter"] || 0) + 1;
+      }
+
+      if (!alt) {
+        acc["altMissingCounter"] = (acc["altMissingCounter"] || 0) + 1;
+      }
+
+      return acc;
+    }, {altCounter: 0, altMeaningfulCounter: 0, altMissingCounter: 0});
+    const filteredImages = images.filter((image) => {
       if (!image.attributes.src) return false;
       return !this.adBlock.matches(image.attributes.src);
     });
 
+    const actionElements = this.domProcessingService.retrieveActionElements(pageJson);
+
+    // QUERY WCAG CONTEXT
+    const wcagTest = await this.wcagCheck.run();
+
+    console.log("VIX STATISTICS", {
+      htmlSize: document.body.outerHTML.length,
+      parsedHtmlSize: parsedDocument.body.outerHTML.length,
+      jsonSize: JSON.stringify(pageJson).length,
+      cleanedJsonSize: JSON.stringify(cleanedDocumentJson).length,
+      textsSize: texts.length,
+      cleanedTextsSize: cleanedTexts.length,
+      filteredAddImages: images.length - filteredImages.length,
+      imagesCount: images.length,
+      ...imagesAltCounter,
+      filteredImagesSize: filteredImages.length,
+      actionElementsSize: actionElements.length,
+      tokenEstimationInOriginal: tokenOriginalEstimation,
+      tokenEstimationInParsed: tokenParsedEstimation,
+      tokenEstimationFullHTML: (document.body.outerHTML.length/4),
+      elementsCount: this.domProcessingService.countElements(pageJson),
+      wcagViolations: wcagTest.inapplicable.length + wcagTest.incomplete.length,
+      GPT_MINI_0: tokenParsedEstimation < 16000,
+      GPT_4_1: tokenParsedEstimation < 32000,
+      GPT_o3_mini: tokenParsedEstimation < 100000,
+      Claude_3_5_Sonnet: tokenParsedEstimation < 20000,
+      DeepSeek_R1: tokenParsedEstimation < 64000,
+    })
+
     try {
-      // LOAD SUMMARY
+      //LOAD SUMMARY
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading summary');
-      const { response: summary } = await this.altContentApi.requestSummary(texts);
+      console.time("VIX: TIME FOR MODEL SUMMARY")
+      const { response: summary } = await this.altContentApi.requestSummary(cleanedTexts, "o4-mini");
+      console.timeEnd("VIX: TIME FOR MODEL SUMMARY")
+
       this.summary = summary;
       this.htmlContent = pageJson;
+      this.actions = actionElements;
+
       this.chatInterface.show();
       this.summaryIndicator.show(summary);
       this.loadingIndicator.updateStatus(loadingDiv, 'Loading additional images context');
 
-      // // QUERY ADDITIONAL IMAGES
-      // const imagesSuccess = await this.imageParsingService.execute(images, summary);
-      // this.loadingIndicator.updateStatus(
-      //   loadingDiv,
-      //   `Added additional alternative images to ${imagesSuccess} images`
-      // );
-      // this.loadingIndicator.updateStatus(loadingDiv, 'Loading WCAG context');
+      // QUERY ADDITIONAL IMAGES
+      const imagesSuccess = await this.imageParsingService.execute(filteredImages, summary, "o4-mini");
+      this.loadingIndicator.updateStatus(
+        loadingDiv,
+        `Added additional alternative images to ${imagesSuccess} images`
+      );
+      this.loadingIndicator.updateStatus(loadingDiv, 'Loading WCAG context');
 
       // // QUERY WCAG CONTEXT
       // const wcagTest = await this.wcagCheck.run();

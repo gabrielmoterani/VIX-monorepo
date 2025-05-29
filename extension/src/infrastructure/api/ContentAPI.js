@@ -3,7 +3,37 @@ class ContentAPI {
     this.API_URL = API_URL;
   }
 
-  async requestImageAltText(imageUrl, summary) {
+  _handleNetworkError(error, operation, context = {}) {
+    let errorType = 'Unknown error';
+    let errorDetails = '';
+
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      if (error.message.includes('Failed to fetch')) {
+        errorType = 'NetworkError';
+        errorDetails = 'Unable to reach the server. Please check your internet connection and server availability.';
+      } else if (error.message.includes('CORS')) {
+        errorType = 'CORS Error';
+        errorDetails = 'Cross-Origin Request Blocked. The server needs to allow requests from this origin.';
+      }
+    } else if (error.name === 'AbortError') {
+      errorType = 'RequestTimeout';
+      errorDetails = 'The request took too long and was aborted.';
+    }
+
+    const errorInfo = {
+      type: errorType,
+      message: error.message,
+      details: errorDetails,
+      operation,
+      timestamp: new Date().toISOString(),
+      ...context
+    };
+
+    console.error(`${operation} failed:`, errorInfo);
+    throw new Error(`${operation} failed: ${errorType} - ${errorDetails}`);
+  }
+
+  async requestImageAltText(imageUrl, summary, model) {
     const timenow = +new Date();
     try {
       // console.log('!!!!!!!', imageUrl, summary);
@@ -20,18 +50,23 @@ class ContentAPI {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${`${this.API_URL}/parse_image`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `Failed to generate image alt text: HTTP ${response.status} - ${response.statusText}\n` +
+          `URL: ${this.API_URL}/parse_image\n` +
+          `Response: ${errorBody}\n` +
+          `Time taken: ${((+new Date()) - timenow) / 1000}s`
         );
       }
 
       return await response.json();
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-      throw error;
+      return this._handleNetworkError(error, 'Image alt text generation', {
+        imageUrl,
+        duration: ((+new Date()) - timenow) / 1000
+      });
     }
   }
 
-  async requestSummary(texts) {
+  async requestSummary(texts, model) {
     const timenow = +new Date();
     try {
       const response = await fetch(`${this.API_URL}/summarize_page`, {
@@ -47,15 +82,19 @@ class ContentAPI {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${`${this.API_URL}/summarize_page`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `Failed to summarize page: HTTP ${response.status} - ${response.statusText}\n` +
+          `URL: ${this.API_URL}/summarize_page\n` +
+          `Response: ${errorBody}\n` +
+          `Time taken: ${((+new Date()) - timenow) / 1000}s`
         );
       }
 
       return await response.json();
     } catch (error) {
-      console.log('!!!!!!!', error);
-      console.error('There was a problem with the fetch operation:', error);
-      throw error;
+      return this._handleNetworkError(error, 'Page summarization', {
+        textLength: texts.length,
+        duration: ((+new Date()) - timenow) / 1000
+      });
     }
   }
 
@@ -75,15 +114,19 @@ class ContentAPI {
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(
-          `HTTP error ${`${this.API_URL}/summarize_page`}! status: ${response.status}, body: ${errorBody}, time:${(timenow - +new Date()) / 1000}s`
+          `Failed to perform WCAG check: HTTP ${response.status} - ${response.statusText}\n` +
+          `URL: ${this.API_URL}/wcag_check\n` +
+          `Response: ${errorBody}\n` +
+          `Time taken: ${((+new Date()) - timenow) / 1000}s`
         );
       }
 
       return await response.json();
     } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
-      throw error;
+      return this._handleNetworkError(error, 'WCAG check', {
+        contentSize: JSON.stringify(jsonContent).length,
+        duration: ((+new Date()) - timenow) / 1000
+      });
     }
   }
-
 }
